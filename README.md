@@ -1,1 +1,3 @@
 Signal Lost: Outpost 7 is an atmospheric, top-down sci-fi survival game that casts players as a deep-space technician trapped aboard a dark, derelict research station. To survive, you must navigate pitch-black corridors using line-of-sight lighting, solve interactive terminal minigames like frequency-tuning and circuit-routing, and carefully balance limited station power between life-support oxygen, defense turrets, and lighting. Every action—from running your flashlight to routing power—generates noise and electrical signatures, forcing you to sneak around a predatory alien entity that relentlessly stalks active energy sources.
+
+https://debanik07.github.io/signal-lost-game/signal_lost_game.html
