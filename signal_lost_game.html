@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SIGNAL LOST // Sci-Fi Tactical Survival</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* ===== PLAYSTATION-STYLE BACKGROUND SYSTEM ===== */
+        body {
+            background-color: #01010d;
+            color: #00f0ff;
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Layered deep-space aurora gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(0, 60, 180, 0.28) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 90%, rgba(90, 0, 180, 0.22) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0, 20, 80, 0.35) 0%, transparent 70%),
+                linear-gradient(160deg, #000814 0%, #010118 40%, #050010 70%, #000814 100%);
+            animation: ps-aurora 12s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes ps-aurora {
+            0%   { background-position: 0% 0%, 100% 100%, 50% 50%; filter: hue-rotate(0deg) brightness(1); }
+            33%  { filter: hue-rotate(15deg) brightness(1.08); }
+            66%  { filter: hue-rotate(-10deg) brightness(0.96); }
+            100% { background-position: 10% 5%, 90% 95%, 55% 45%; filter: hue-rotate(5deg) brightness(1.04); }
+        }
+
+        /* Geometric dot grid overlay (PS-style) */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                radial-gradient(circle, rgba(0, 180, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(rgba(0, 100, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 100, 255, 0.04) 1px, transparent 1px);
+            background-size: 48px 48px, 96px 96px, 96px 96px;
+            animation: grid-drift 30s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes grid-drift {
+            from { background-position: 0 0, 0 0, 0 0; }
+            to   { background-position: 48px 48px, 96px 96px, 96px 96px; }
+        }
+
+        /* Floating ambient particle canvas */
+        #ps-particles {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Diagonal sweep shine - PS console UI signature */
+        .ps-shine {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(
+                115deg,
+                transparent 0%,
+                transparent 40%,
+                rgba(80, 160, 255, 0.025) 50%,
+                transparent 60%,
+                transparent 100%
+            );
+            background-size: 200% 200%;
+            animation: ps-sweep 8s ease-in-out infinite;
+        }
+
+        @keyframes ps-sweep {
+            0%   { background-position: -100% -100%; }
+            50%  { background-position: 200% 200%; }
+            100% { background-position: -100% -100%; }
+        }
+
+        /* All real content sits above background layers */
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+        #ps-particles, .ps-shine {
+            z-index: 0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* CRT Scanline Effect */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.008), rgba(0, 0, 255, 0.02));
+            z-index: 20;
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+        }
+
+        /* Glowing neon utilities */
+        .glow-cyan  { text-shadow: 0 0 8px rgba(0, 240, 255, 0.6); }
+        .glow-green { text-shadow: 0 0 8px rgba(10, 255, 120, 0.6); }
+        .glow-red   { text-shadow: 0 0 8px rgba(255, 50, 50, 0.7); }
+        .border-glow     { box-shadow: 0 0 12px rgba(0, 240, 255, 0.35); }
+        .border-glow-red { box-shadow: 0 0 12px rgba(255, 50, 50, 0.35); }
+
+        /* Header / footer get PS-glass treatment */
+        header, footer {
+            background: linear-gradient(135deg, rgba(5,10,30,0.85) 0%, rgba(10,5,40,0.8) 100%) !important;
+            backdrop-filter: blur(16px) saturate(1.4) !important;
+            border-color: rgba(0, 140, 255, 0.22) !important;
+            box-shadow: 0 0 24px rgba(0, 80, 255, 0.12), inset 0 1px 0 rgba(100, 180, 255, 0.08) !important;
+        }
+
+        /* Start/End overlay PS vibe */
+        #start-overlay, #end-overlay {
+            background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(0,30,100,0.6) 0%, rgba(1,1,13,0.97) 70%) !important;
+        }
+
+        /* Custom UI slider */
+        input[type=range] {
+            accent-color: #00f0ff;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex flex-col justify-between items-center crt text-cyan-400 p-2 sm:p-4 select-none">
+
+    <canvas id="ps-particles"></canvas>
+    <div class="ps-shine"></div>
+
+    <!-- TOP HEADER / STATUS HUD -->
+    <header class="w-full max-w-6xl flex justify-between items-center bg-slate-900/80 backdrop-blur-md border border-cyan-500/30 rounded-lg p-2 sm:p-3 mb-2 z-10 shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="flex flex-col">
+                <span class="text-xs text-cyan-500 tracking-wider">STATION STATUS</span>
+                <span id="station-status-text" class="font-orbitron text-sm sm:text-base font-bold text-red-500 animate-pulse">CRITICAL // NO SIGNAL</span>
+            </div>
+        </div>
+
+        <!-- Vitals & Resources Bar -->
+        <div class="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm">
+            <!-- Oxygen -->
+            <div class="flex flex-col items-center">
+                <span class="text-slate-400">O2 LEVEL</span>
+                <div class="w-20 sm:w-28 bg-slate-800 h-3 rounded-full overflow-hidden border border-cyan-500/30">
+                    <div id="o2-bar" class="bg-cyan-400 h-full w-full transition-all duration-300"></div>
+                </div>
+            </div>
+            <!-- Battery / Main Power -->
+            <div class="flex flex-col items-center">
+                <span class="text-slate-400">POWER CELL</span>
+                <div class="w-20 sm:w-28 bg-slate-800 h-3 rounded-full overflow-hidden border border-yellow-500/30">
+                    <div id="power-bar" class="bg-yellow-400 h-full w-full transition-all duration-300"></div>
+                </div>
+            </div>
+            <!-- Scrap Inventory -->
+            <div class="flex flex-col items-end">
+                <span class="text-slate-400">SCRAP</span>
+                <span id="scrap-count" class="font-orbitron text-yellow-400 font-bold text-sm sm:text-base">0 / 20</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN DISPLAY CANVAS WRAPPER -->
+    <main class="relative w-full max-w-6xl flex-1 flex justify-center items-center overflow-hidden rounded-xl border border-cyan-500/20 bg-slate-900/50 shadow-2xl">
+        <canvas id="gameCanvas" class="w-full h-full object-contain cursor-crosshair"></canvas>
+
+        <!-- NOISE & RADAR OVERLAY PANEL (TOP-LEFT) -->
+        <div class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur-md p-2.5 rounded-lg border border-cyan-500/30 flex flex-col gap-2 z-10 w-44">
+            <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">ACOUSTIC RADAR</span>
+                <span id="stealth-indicator" class="text-green-400 font-bold">SILENT</span>
+            </div>
+            <!-- Noise Meter Visualizer -->
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="noise-bar" class="bg-green-400 h-full w-0 transition-all duration-100"></div>
+            </div>
+            <!-- Relays Progress -->
+            <div class="flex justify-between items-center text-xs mt-1">
+                <span class="text-slate-400">RELAYS FIXED</span>
+                <span id="relay-counter" class="text-cyan-400 font-orbitron font-bold">0 / 4</span>
+            </div>
+        </div>
+
+        <!-- POWER GRID MANAGEMENT QUICK PANEL (TOP-RIGHT) -->
+        <div class="absolute top-3 right-3 bg-slate-900/85 backdrop-blur-md p-2.5 rounded-lg border border-cyan-500/30 flex flex-col gap-2 z-10 text-xs w-48">
+            <div class="text-cyan-400 font-orbitron font-bold text-center border-b border-cyan-500/20 pb-1">GRID POWER ALLOCATION</div>
+            <div class="flex justify-between items-center">
+                <span>LIFE SUPPORT</span>
+                <button id="toggle-o2-btn" class="px-2 py-0.5 rounded bg-green-600/80 hover:bg-green-500 text-white font-bold transition">ON</button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span>SECURITY TURRETS</span>
+                <button id="toggle-turrets-btn" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-cyan-600 text-white font-bold transition">OFF</button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span>STATION LIGHTS</span>
+                <button id="toggle-lights-btn" class="px-2 py-0.5 rounded bg-green-600/80 hover:bg-green-500 text-white font-bold transition">ON</button>
+            </div>
+        </div>
+
+        <!-- INTERACTION PROMPT -->
+        <div id="interaction-prompt" class="hidden absolute bottom-6 bg-slate-900/90 text-cyan-300 px-4 py-2 rounded-lg border border-cyan-400 glow-cyan font-orbitron text-sm animate-bounce z-10">
+            [E] or TAP to INTERACT
+        </div>
+
+        <!-- START MENU OVERLAY -->
+        <div id="start-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center text-center p-6 z-30">
+            <h1 class="font-orbitron text-4xl sm:text-6xl font-black text-cyan-400 tracking-wider glow-cyan mb-2">SIGNAL LOST</h1>
+            <p class="text-slate-400 text-sm sm:text-base max-w-xl mb-6">
+                RESEARCH OUTPOST 7 HAS GONE SILENT. AN UNKNOWN ENTITY HIDE IN THE CORRIDORS. REPAIR ALL 4 SIGNAL RELAYS TO SEND A DISTRESS FREQUENCY BEFORE YOUR OXYGEN OR POWER EXHAUSTS.
+            </p>
+            <div class="bg-slate-900/80 border border-cyan-500/30 p-4 rounded-lg max-w-md text-left text-xs sm:text-sm text-slate-300 mb-6 space-y-2">
+                <p>🔹 <strong class="text-cyan-400">WASD / Arrow Keys:</strong> Walk around station corridors.</p>
+                <p>🔹 <strong class="text-cyan-400">[E] Key / Touch:</strong> Repair Relays, Search Scrap, Open Terminals.</p>
+                <p>🔹 <strong class="text-cyan-400">[F] Key:</strong> Toggle Flashlight (consumes power & attracts monster!).</p>
+                <p>🔹 <strong class="text-cyan-400">Stealth:</strong> Turning off Flashlight and Lights keeps you safe, but drain your oxygen and sanity faster.</p>
+            </div>
+            <button id="start-game-btn" class="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-black text-lg rounded-md border-glow transition transform hover:scale-105 active:scale-95">
+                INITIALIZE SYSTEM
+            </button>
+        </div>
+
+        <!-- GAME OVER / VICTORY OVERLAY -->
+        <div id="end-overlay" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col justify-center items-center text-center p-6 z-30">
+            <h2 id="end-title" class="font-orbitron text-4xl sm:text-5xl font-bold mb-4 glow-red text-red-500">SIGNAL TERMINATED</h2>
+            <p id="end-description" class="text-slate-300 text-sm sm:text-base max-w-md mb-6">You failed to survive the anomaly.</p>
+            <button id="restart-game-btn" class="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-bold text-base rounded-md border-glow transition">
+                REBOOT SYSTEM
+            </button>
+        </div>
+
+        <!-- SIGNAL TUNING TERMINAL MODAL -->
+        <div id="terminal-modal" class="hidden absolute inset-4 sm:inset-12 bg-slate-950/95 border-2 border-cyan-500/80 rounded-xl p-4 sm:p-6 flex flex-col justify-between z-20 border-glow">
+            <div class="flex justify-between items-center border-b border-cyan-500/30 pb-2">
+                <span class="font-orbitron text-cyan-400 text-lg font-bold flex items-center gap-2">
+                    <span class="w-3 h-3 bg-cyan-400 rounded-full animate-ping"></span> SIGNAL RELAY TERMINAL
+                </span>
+                <button id="close-terminal-btn" class="text-slate-400 hover:text-red-400 text-xl font-bold">✕</button>
+            </div>
+
+            <!-- Signal Frequency Matching Canvas -->
+            <div class="flex-1 my-4 flex flex-col items-center justify-center relative bg-slate-900 rounded-lg p-2 border border-slate-800">
+                <div class="text-xs text-slate-400 mb-1 w-full flex justify-between px-2">
+                    <span>TARGET FREQUENCY (GREEN)</span>
+                    <span id="signal-sync-percent" class="text-yellow-400 font-bold">SYNC: 0%</span>
+                    <span>YOUR FREQUENCY (CYAN)</span>
+                </div>
+                <canvas id="signalCanvas" class="w-full h-40 sm:h-52 bg-slate-950 rounded border border-cyan-900"></canvas>
+            </div>
+
+            <!-- Minigame Sliders -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs text-cyan-300 flex justify-between">
+                        <span>FREQUENCY MODULATOR</span>
+                        <span id="freq-val" class="text-cyan-400">1.0</span>
+                    </label>
+                    <input type="range" id="freq-slider" min="0.5" max="5.0" step="0.1" value="1.0" class="w-full cursor-pointer">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs text-cyan-300 flex justify-between">
+                        <span>AMPLITUDE MODULATOR</span>
+                        <span id="amp-val" class="text-cyan-400">1.0</span>
+                    </label>
+                    <input type="range" id="amp-slider" min="0.5" max="3.0" step="0.1" value="1.0" class="w-full cursor-pointer">
+                </div>
+            </div>
+
+            <button id="confirm-tuning-btn" class="mt-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-orbitron font-bold text-sm rounded transition disabled:opacity-50 disabled:cursor-not-allowed">
+                LOCK SIGNAL FREQUENCY
+            </button>
+        </div>
+
+    </main>
+
+    <!-- BOTTOM FOOTER / ON-SCREEN CONTROLS -->
+    <footer class="w-full max-w-6xl mt-2 flex justify-between items-center bg-slate-900/80 border border-cyan-500/20 rounded-lg p-2 text-xs">
+        <!-- Key Quick-Guide -->
+        <div class="hidden sm:flex gap-4 text-slate-400">
+            <span>[WASD] Walk</span>
+            <span>[E] Interact</span>
+            <span>[F] Flashlight</span>
+            <span>[SPACE] Sprint</span>
+        </div>
+
+        <!-- Touch Controls for Mobile/Tablet Accessibility -->
+        <div class="flex sm:hidden justify-around w-full items-center">
+            <!-- D-Pad Directional Buttons -->
+            <div class="grid grid-cols-3 gap-1 w-28 h-28">
+                <div></div>
+                <button id="btn-up" class="bg-slate-800 active:bg-cyan-600 rounded border border-cyan-500/30 text-cyan-300 font-bold">▲</button>
+                <div></div>
+                <button id="btn-left" class="bg-slate-800 active:bg-cyan-600 rounded border border-cyan-500/30 text-cyan-300 font-bold">◀</button>
+                <div class="bg-slate-900/50 rounded flex items-center justify-center text-[10px] text-slate-500">MOVE</div>
+                <button id="btn-right" class="bg-slate-800 active:bg-cyan-600 rounded border border-cyan-500/30 text-cyan-300 font-bold">▶</button>
+                <div></div>
+                <button id="btn-down" class="bg-slate-800 active:bg-cyan-600 rounded border border-cyan-500/30 text-cyan-300 font-bold">▼</button>
+                <div></div>
+            </div>
+
+            <!-- Mobile Action Buttons -->
+            <div class="flex gap-2">
+                <button id="btn-flashlight" class="w-12 h-12 rounded-full bg-slate-800 active:bg-yellow-500 border border-yellow-500/40 text-yellow-400 font-bold text-xs flex items-center justify-center">
+                    🔦
+                </button>
+                <button id="btn-interact" class="w-14 h-14 rounded-full bg-cyan-600 active:bg-cyan-400 border border-cyan-300 text-slate-950 font-bold font-orbitron text-xs flex items-center justify-center">
+                    USE
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ===== PLAYSTATION-STYLE AMBIENT PARTICLE SYSTEM =====
+        (function initPSParticles() {
+            const pc = document.getElementById('ps-particles');
+            if (!pc) return;
+            const px = pc.getContext('2d');
+
+            const resize = () => { pc.width = window.innerWidth; pc.height = window.innerHeight; };
+            resize();
+            window.addEventListener('resize', resize);
+
+            const COUNT = 55;
+            const particles = Array.from({ length: COUNT }, () => ({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                r: Math.random() * 1.8 + 0.4,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: -(Math.random() * 0.5 + 0.15),
+                alpha: Math.random() * 0.5 + 0.1,
+                hue: Math.random() < 0.6 ? 200 + Math.random() * 40 : 260 + Math.random() * 30,
+                pulse: Math.random() * Math.PI * 2
+            }));
+
+            function drawParticles(ts) {
+                px.clearRect(0, 0, pc.width, pc.height);
+                particles.forEach(p => {
+                    p.pulse += 0.018;
+                    const a = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
+                    px.beginPath();
+                    const grad = px.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3);
+                    grad.addColorStop(0, `hsla(${p.hue}, 100%, 75%, ${a})`);
+                    grad.addColorStop(1, `hsla(${p.hue}, 100%, 60%, 0)`);
+                    px.fillStyle = grad;
+                    px.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+                    px.fill();
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.y < -10) { p.y = pc.height + 10; p.x = Math.random() * pc.width; }
+                    if (p.x < -10) p.x = pc.width + 10;
+                    if (p.x > pc.width + 10) p.x = -10;
+                });
+                requestAnimationFrame(drawParticles);
+            }
+            requestAnimationFrame(drawParticles);
+        })();
+
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playBeep(freq = 440, type = 'sine', duration = 0.1, vol = 0.1) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            }
+
+            playFootstep() {
+                if (!this.ctx) return;
+                this.playBeep(120 + Math.random() * 40, 'triangle', 0.05, 0.05);
+            }
+
+            playStatic() {
+                if (!this.ctx) return;
+                const bufferSize = this.ctx.sampleRate * 0.1;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+                noise.connect(gain);
+                gain.connect(this.ctx.destination);
+                noise.start();
+            }
+
+            playEntityGrowl() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(60, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(30, this.ctx.currentTime + 0.6);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.6);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.6);
+            }
+
+            playAlarm() {
+                this.playBeep(880, 'square', 0.2, 0.15);
+            }
+
+            playVictory() {
+                if (!this.ctx) return;
+                [440, 554.37, 659.25, 880].forEach((f, idx) => {
+                    setTimeout(() => this.playBeep(f, 'sine', 0.3, 0.2), idx * 150);
+                });
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        const TILE_SIZE = 40;
+        const MAP_COLS = 24;
+        const MAP_ROWS = 18;
+
+        // Map layout matrix: 0=floor, 1=wall, 2=relay, 3=scrap, 4=turret
+        const STATION_MAP = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,1,0,0,0,0,0,1,2,0,0,0,1,0,0,0,0,0,0,0,1],
+            [1,0,2,0,1,0,1,1,1,0,1,0,0,1,0,1,0,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,1,3,1,0,0,0,0,1,0,0,0,1,3,0,0,1,0,1],
+            [1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,0,0,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,2,0,1,0,1],
+            [1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1],
+            [1,0,1,3,0,1,0,1,2,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,0,0,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,3,0,0,1],
+            [1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,0,0,0,1],
+            [1,0,0,1,0,1,0,0,0,1,0,1,3,0,0,1,0,0,0,1,1,1,0,1],
+            [1,0,2,1,0,1,0,1,0,1,0,1,0,0,0,1,1,1,0,1,0,0,0,1],
+            [1,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,1],
+            [1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1],
+            [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = MAP_COLS * TILE_SIZE;
+        canvas.height = MAP_ROWS * TILE_SIZE;
+
+        // Player State
+        const player = {
+            x: 2 * TILE_SIZE + 20,
+            y: 2 * TILE_SIZE + 20,
+            radius: 12,
+            speed: 2.2,
+            sprintSpeed: 3.6,
+            flashlight: true,
+            oxygen: 100,
+            power: 100,
+            scrap: 0,
+            isMoving: false,
+            isSprinting: false,
+            noiseLevel: 0
+        };
+
+        // Alien Entity AI State
+        const entity = {
+            x: 20 * TILE_SIZE + 20,
+            y: 15 * TILE_SIZE + 20,
+            radius: 14,
+            speed: 1.4,
+            chaseSpeed: 2.8,
+            state: 'patrol', // 'patrol' or 'chase'
+            patrolTarget: { x: 12 * TILE_SIZE, y: 8 * TILE_SIZE },
+            alertness: 0
+        };
+
+        // Station Infrastructure
+        const relays = [
+            { id: 1, gridX: 11, gridY: 1, fixed: false, activeType: 'tuning' },
+            { id: 2, gridX: 2, gridY: 2, fixed: false, activeType: 'tuning' },
+            { id: 3, gridX: 19, gridY: 5, fixed: false, activeType: 'tuning' },
+            { id: 4, gridX: 8, gridY: 7, fixed: false, activeType: 'tuning' }
+        ];
+
+        let scrapItems = [
+            { x: 7 * TILE_SIZE + 20, y: 3 * TILE_SIZE + 20, collected: false },
+            { x: 18 * TILE_SIZE + 20, y: 3 * TILE_SIZE + 20, collected: false },
+            { x: 3 * TILE_SIZE + 20, y: 7 * TILE_SIZE + 20, collected: false },
+            { x: 20 * TILE_SIZE + 20, y: 9 * TILE_SIZE + 20, collected: false },
+            { x: 12 * TILE_SIZE + 20, y: 11 * TILE_SIZE + 20, collected: false },
+            { x: 1 * TILE_SIZE + 20, y: 15 * TILE_SIZE + 20, collected: false },
+            { x: 22 * TILE_SIZE + 20, y: 15 * TILE_SIZE + 20, collected: false }
+        ];
+
+        // Station Power Grid Toggle States
+        const gridPower = {
+            lifeSupport: true,
+            turrets: false,
+            lights: true
+        };
+
+        let keys = {};
+        let gameRunning = false;
+        let activeInteractable = null;
+        let activeModal = null;
+
+        window.addEventListener('keydown', e => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === 'f' && gameRunning) {
+                player.flashlight = !player.flashlight;
+                sound.playBeep(600, 'sine', 0.05, 0.1);
+            }
+            if ((e.key.toLowerCase() === 'e' || e.key === ' ') && activeInteractable) {
+                triggerInteraction(activeInteractable);
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Touch Control Bindings
+        const setupTouchBtn = (id, keyName) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
+        };
+
+        setupTouchBtn('btn-up', 'w');
+        setupTouchBtn('btn-down', 's');
+        setupTouchBtn('btn-left', 'a');
+        setupTouchBtn('btn-right', 'd');
+
+        document.getElementById('btn-flashlight').addEventListener('click', () => {
+            player.flashlight = !player.flashlight;
+            sound.playBeep(600, 'sine', 0.05, 0.1);
+        });
+
+        document.getElementById('btn-interact').addEventListener('click', () => {
+            if (activeInteractable) triggerInteraction(activeInteractable);
+        });
+
+        // Station Power Grid Buttons
+        document.getElementById('toggle-o2-btn').addEventListener('click', function() {
+            gridPower.lifeSupport = !gridPower.lifeSupport;
+            this.textContent = gridPower.lifeSupport ? 'ON' : 'OFF';
+            this.className = gridPower.lifeSupport ? 'px-2 py-0.5 rounded bg-green-600/80 hover:bg-green-500 text-white font-bold transition' : 'px-2 py-0.5 rounded bg-slate-700 hover:bg-red-600 text-white font-bold transition';
+        });
+
+        document.getElementById('toggle-turrets-btn').addEventListener('click', function() {
+            gridPower.turrets = !gridPower.turrets;
+            this.textContent = gridPower.turrets ? 'ON' : 'OFF';
+            this.className = gridPower.turrets ? 'px-2 py-0.5 rounded bg-green-600/80 hover:bg-green-500 text-white font-bold transition' : 'px-2 py-0.5 rounded bg-slate-700 hover:bg-red-600 text-white font-bold transition';
+        });
+
+        document.getElementById('toggle-lights-btn').addEventListener('click', function() {
+            gridPower.lights = !gridPower.lights;
+            this.textContent = gridPower.lights ? 'ON' : 'OFF';
+            this.className = gridPower.lights ? 'px-2 py-0.5 rounded bg-green-600/80 hover:bg-green-500 text-white font-bold transition' : 'px-2 py-0.5 rounded bg-slate-700 hover:bg-red-600 text-white font-bold transition';
+        });
+
+        function isWall(x, y) {
+            const col = Math.floor(x / TILE_SIZE);
+            const row = Math.floor(y / TILE_SIZE);
+            if (row < 0 || row >= MAP_ROWS || col < 0 || col >= MAP_COLS) return true;
+            return STATION_MAP[row][col] === 1;
+        }
+
+        function updatePlayer() {
+            if (!gameRunning || activeModal) return;
+
+            let speed = (keys['Shift'] || keys[' ']) ? player.sprintSpeed : player.speed;
+            let dx = 0;
+            let dy = 0;
+
+            if (keys['w'] || keys['arrowup']) dy -= 1;
+            if (keys['s'] || keys['arrowdown']) dy += 1;
+            if (keys['a'] || keys['arrowleft']) dx -= 1;
+            if (keys['d'] || keys['arrowright']) dx += 1;
+
+            if (dx !== 0 && dy !== 0) {
+                dx *= 0.7071;
+                dy *= 0.7071;
+            }
+
+            let newX = player.x + dx * speed;
+            let newY = player.y + dy * speed;
+
+            // Simple Circle-Wall collision response
+            if (!isWall(newX - player.radius, player.y) && !isWall(newX + player.radius, player.y)) {
+                player.x = newX;
+            }
+            if (!isWall(player.x, newY - player.radius) && !isWall(player.x, newY + player.radius)) {
+                player.y = newY;
+            }
+
+            player.isMoving = dx !== 0 || dy !== 0;
+            player.isSprinting = player.isMoving && (keys['Shift'] || keys[' ']);
+
+            // Sound Generation & Noise Meter
+            if (player.isMoving) {
+                player.noiseLevel = player.isSprinting ? 80 : 35;
+                if (Math.random() < 0.1) sound.playFootstep();
+            } else {
+                player.noiseLevel = player.flashlight ? 15 : 0;
+            }
+
+            // Power & Oxygen Depletion Mechanics
+            if (gridPower.lifeSupport) {
+                player.oxygen = Math.min(100, player.oxygen + 0.03);
+            } else {
+                player.oxygen -= 0.08; // Fast depletion when life support is off
+            }
+
+            if (player.flashlight) player.power -= 0.03;
+            if (gridPower.lights) player.power -= 0.01;
+            if (gridPower.turrets) player.power -= 0.02;
+
+            if (player.power <= 0) {
+                player.power = 0;
+                player.flashlight = false;
+                gridPower.lights = false;
+            }
+
+            if (player.oxygen <= 0) {
+                endGame(false, "OXYGEN DEPLETED // SUFFOCATED");
+            }
+
+            checkProximityAndInteractions();
+        }
+
+        function updateEntity() {
+            if (!gameRunning) return;
+
+            // Distance to player
+            const distToPlayer = Math.hypot(player.x - entity.x, player.y - entity.y);
+
+            // Entity senses player noise or high station lighting
+            let detectionThreshold = 250;
+            if (player.flashlight) detectionThreshold += 100;
+            if (gridPower.lights) detectionThreshold += 50;
+
+            if (distToPlayer < detectionThreshold && player.noiseLevel > 20) {
+                entity.state = 'chase';
+                entity.alertness = 100;
+            } else if (distToPlayer > 350) {
+                entity.state = 'patrol';
+            }
+
+            let targetX = entity.patrolTarget.x;
+            let targetY = entity.patrolTarget.y;
+
+            if (entity.state === 'chase') {
+                targetX = player.x;
+                targetY = player.y;
+                if (Math.random() < 0.02) sound.playEntityGrowl();
+            } else {
+                // Random patrol target switching
+                if (Math.hypot(entity.x - targetX, entity.y - targetY) < 30) {
+                    entity.patrolTarget = {
+                        x: Math.floor(Math.random() * (MAP_COLS - 2) + 1) * TILE_SIZE,
+                        y: Math.floor(Math.random() * (MAP_ROWS - 2) + 1) * TILE_SIZE
+                    };
+                }
+            }
+
+            // Move Entity towards Target
+            const angle = Math.atan2(targetY - entity.y, targetX - entity.x);
+            const currentSpeed = entity.state === 'chase' ? entity.chaseSpeed : entity.speed;
+
+            let nextX = entity.x + Math.cos(angle) * currentSpeed;
+            let nextY = entity.y + Math.sin(angle) * currentSpeed;
+
+            if (!isWall(nextX, nextY)) {
+                entity.x = nextX;
+                entity.y = nextY;
+            }
+
+            // Caught Player Condition
+            if (distToPlayer < (player.radius + entity.radius)) {
+                endGame(false, "ENTITY CAUGHT YOU IN THE DARKNESS");
+            }
+        }
+
+        function checkProximityAndInteractions() {
+            activeInteractable = null;
+            const promptEl = document.getElementById('interaction-prompt');
+
+            // Check Relay interactions
+            relays.forEach(relay => {
+                if (!relay.fixed) {
+                    const rx = relay.gridX * TILE_SIZE + TILE_SIZE / 2;
+                    const ry = relay.gridY * TILE_SIZE + TILE_SIZE / 2;
+                    if (Math.hypot(player.x - rx, player.y - ry) < 45) {
+                        activeInteractable = { type: 'relay', data: relay };
+                    }
+                }
+            });
+
+            // Check Scrap Pickup interactions
+            scrapItems.forEach(item => {
+                if (!item.collected && Math.hypot(player.x - item.x, player.y - item.y) < 35) {
+                    activeInteractable = { type: 'scrap', data: item };
+                }
+            });
+
+            if (activeInteractable) {
+                promptEl.classList.remove('hidden');
+            } else {
+                promptEl.classList.add('hidden');
+            }
+        }
+
+        function triggerInteraction(interactable) {
+            if (interactable.type === 'scrap') {
+                interactable.data.collected = true;
+                player.scrap += 5;
+                sound.playBeep(800, 'sine', 0.1, 0.15);
+                document.getElementById('scrap-count').textContent = `${player.scrap} / 20`;
+            } else if (interactable.type === 'relay') {
+                openSignalModal(interactable.data);
+            }
+        }
+
+        let activeRelayForMinigame = null;
+        let targetFreq = 2.0;
+        let targetAmp = 1.5;
+
+        function openSignalModal(relay) {
+            activeRelayForMinigame = relay;
+            activeModal = 'terminal';
+            targetFreq = (1.0 + Math.random() * 3.0).toFixed(1);
+            targetAmp = (0.8 + Math.random() * 1.8).toFixed(1);
+
+            document.getElementById('freq-slider').value = 1.0;
+            document.getElementById('amp-slider').value = 1.0;
+            document.getElementById('terminal-modal').classList.remove('hidden');
+            sound.playStatic();
+            renderSignalMinigame();
+        }
+
+        document.getElementById('freq-slider').addEventListener('input', (e) => {
+            document.getElementById('freq-val').textContent = e.target.value;
+            sound.playBeep(300 + e.target.value * 100, 'sine', 0.03, 0.05);
+            renderSignalMinigame();
+        });
+
+        document.getElementById('amp-slider').addEventListener('input', (e) => {
+            document.getElementById('amp-val').textContent = e.target.value;
+            sound.playBeep(200 + e.target.value * 100, 'sine', 0.03, 0.05);
+            renderSignalMinigame();
+        });
+
+        function renderSignalMinigame() {
+            const sigCanvas = document.getElementById('signalCanvas');
+            const sigCtx = sigCanvas.getContext('2d');
+            sigCanvas.width = sigCanvas.clientWidth;
+            sigCanvas.height = sigCanvas.clientHeight;
+
+            const userFreq = parseFloat(document.getElementById('freq-slider').value);
+            const userAmp = parseFloat(document.getElementById('amp-slider').value);
+
+            sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+
+            // Draw Target Wave (Green)
+            sigCtx.beginPath();
+            sigCtx.strokeStyle = '#10b981';
+            sigCtx.lineWidth = 3;
+            for (let x = 0; x < sigCanvas.width; x++) {
+                const y = sigCanvas.height / 2 + Math.sin(x * 0.03 * targetFreq) * (30 * targetAmp);
+                if (x === 0) sigCtx.moveTo(x, y); else sigCtx.lineTo(x, y);
+            }
+            sigCtx.stroke();
+
+            // Draw User Wave (Cyan)
+            sigCtx.beginPath();
+            sigCtx.strokeStyle = '#00f0ff';
+            sigCtx.lineWidth = 2;
+            for (let x = 0; x < sigCanvas.width; x++) {
+                const y = sigCanvas.height / 2 + Math.sin(x * 0.03 * userFreq) * (30 * userAmp);
+                if (x === 0) sigCtx.moveTo(x, y); else sigCtx.lineTo(x, y);
+            }
+            sigCtx.stroke();
+
+            // Calculate Sync Accuracy
+            const freqDiff = Math.abs(userFreq - targetFreq);
+            const ampDiff = Math.abs(userAmp - targetAmp);
+            const syncPercent = Math.max(0, Math.floor(100 - (freqDiff * 25 + ampDiff * 25)));
+
+            document.getElementById('signal-sync-percent').textContent = `SYNC: ${syncPercent}%`;
+
+            const lockBtn = document.getElementById('confirm-tuning-btn');
+            if (syncPercent >= 88) {
+                lockBtn.disabled = false;
+                lockBtn.classList.add('animate-pulse', 'bg-green-500');
+            } else {
+                lockBtn.disabled = true;
+                lockBtn.classList.remove('animate-pulse', 'bg-green-500');
+            }
+        }
+
+        document.getElementById('confirm-tuning-btn').addEventListener('click', () => {
+            if (activeRelayForMinigame) {
+                activeRelayForMinigame.fixed = true;
+                sound.playVictory();
+                closeModals();
+                checkVictoryCondition();
+            }
+        });
+
+
+        document.getElementById('close-terminal-btn').addEventListener('click', closeModals);
+
+        function closeModals() {
+            document.getElementById('terminal-modal').classList.add('hidden');
+            activeModal = null;
+        }
+
+        function checkVictoryCondition() {
+            const fixedCount = relays.filter(r => r.fixed).length;
+            document.getElementById('relay-counter').textContent = `${fixedCount} / 4`;
+
+            if (fixedCount >= 4) {
+                endGame(true, "DISTRESS SIGNAL TRANSMITTED // EVACUATION TEAM EN ROUTE");
+            }
+        }
+
+        function renderMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Render Map Tiles
+            for (let row = 0; row < MAP_ROWS; row++) {
+                for (let col = 0; col < MAP_COLS; col++) {
+                    const tile = STATION_MAP[row][col];
+                    const x = col * TILE_SIZE;
+                    const y = row * TILE_SIZE;
+
+                    if (tile === 1) {
+                        ctx.fillStyle = '#1e293b';
+                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        ctx.strokeStyle = '#0f172a';
+                        ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        ctx.fillStyle = gridPower.lights ? '#090d16' : '#020408';
+                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        ctx.strokeStyle = '#1e293b';
+                        ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                    }
+                }
+            }
+
+            // Render Relays
+            relays.forEach(relay => {
+                const rx = relay.gridX * TILE_SIZE + TILE_SIZE / 2;
+                const ry = relay.gridY * TILE_SIZE + TILE_SIZE / 2;
+
+                ctx.beginPath();
+                ctx.arc(rx, ry, 12, 0, Math.PI * 2);
+                ctx.fillStyle = relay.fixed ? '#10b981' : '#ef4444';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                if (!relay.fixed) {
+                    ctx.beginPath();
+                    ctx.arc(rx, ry, 16, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+                    ctx.stroke();
+                }
+            });
+
+            // Render Scrap Items
+            scrapItems.forEach(item => {
+                if (!item.collected) {
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.fillRect(item.x - 6, item.y - 6, 12, 12);
+                }
+            });
+
+            // Render Alien Entity
+            ctx.beginPath();
+            ctx.arc(entity.x, entity.y, entity.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#dc2626';
+            ctx.fill();
+            ctx.shadowColor = '#red';
+            ctx.shadowBlur = 10;
+
+            // Entity Eye Flare
+            ctx.beginPath();
+            ctx.arc(entity.x, entity.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#fef08a';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Render Player
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#00f0ff';
+            ctx.fill();
+
+            // Flashlight / Dynamic Lighting Effect (Fog of War Masking)
+            renderFogOfWar();
+        }
+
+        function renderFogOfWar() {
+            ctx.save();
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.94)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Create Light Aperture around Player
+            ctx.globalCompositeOperation = 'destination-out';
+
+            const lightRadius = player.flashlight ? 180 : (gridPower.lights ? 110 : 50);
+            const grad = ctx.createRadialGradient(player.x, player.y, 10, player.x, player.y, lightRadius);
+            grad.addColorStop(0, 'rgba(0,0,0,1)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, lightRadius, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function updateHUD() {
+            document.getElementById('o2-bar').style.width = `${Math.max(0, player.oxygen)}%`;
+            document.getElementById('power-bar').style.width = `${Math.max(0, player.power)}%`;
+
+            const noiseBar = document.getElementById('noise-bar');
+            noiseBar.style.width = `${Math.min(100, player.noiseLevel)}%`;
+
+            const stealthTxt = document.getElementById('stealth-indicator');
+            if (player.noiseLevel > 60) {
+                stealthTxt.textContent = 'NOISY';
+                stealthTxt.className = 'text-red-500 font-bold animate-ping';
+            } else if (player.noiseLevel > 20) {
+                stealthTxt.textContent = 'CAUTIOUS';
+                stealthTxt.className = 'text-yellow-400 font-bold';
+            } else {
+                stealthTxt.textContent = 'SILENT';
+                stealthTxt.className = 'text-green-400 font-bold';
+            }
+        }
+
+        function gameLoop() {
+            if (gameRunning) {
+                updatePlayer();
+                updateEntity();
+                renderMap();
+                updateHUD();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            sound.init();
+            gameRunning = true;
+            document.getElementById('start-overlay').classList.add('hidden');
+            document.getElementById('end-overlay').classList.add('hidden');
+            sound.playBeep(440, 'sine', 0.2, 0.1);
+        }
+
+        function endGame(victory, message) {
+            gameRunning = false;
+            const overlay = document.getElementById('end-overlay');
+            const title = document.getElementById('end-title');
+            const desc = document.getElementById('end-description');
+
+            overlay.classList.remove('hidden');
+            desc.textContent = message;
+
+            if (victory) {
+                title.textContent = "SIGNAL ESTABLISHED";
+                title.className = "font-orbitron text-4xl sm:text-5xl font-bold mb-4 glow-green text-green-400";
+            } else {
+                title.textContent = "SIGNAL TERMINATED";
+                title.className = "font-orbitron text-4xl sm:text-5xl font-bold mb-4 glow-red text-red-500";
+            }
+        }
+
+        document.getElementById('start-game-btn').addEventListener('click', startGame);
+        document.getElementById('restart-game-btn').addEventListener('click', () => {
+            location.reload();
+        });
+
+        // Start animation loop on frame load
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
